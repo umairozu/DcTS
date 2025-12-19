@@ -1,21 +1,29 @@
 
-import argparse;
-import math;
-from pathlib import Path;
-import numpy as np;
-import matplotlib.pyplot as plt;
+#import argparse
+import math
+import random
+from cmath import exp
+from pathlib import Path
+from typing import Optional, List
+
+import numpy as np
+import matplotlib.pyplot as plt
 
 
 R = 8.31446261815324 # gas const in J/(mol * k)
-eDNA_Ea = 133.9e3    # E-DNA activation energy value
+eDNA_Ea =  133880.342  # E-DNA activation energy value from data
+dDNA_Ea = 90813.822     # D-DNA activation energy value from data
 
 """assuming activation energy of D-DNA <= E-DNA 
 (need to refine this with probably stats from MESA
  or DeSP)"""
-dDna_Ea = eDNA_Ea
+#dDna_Ea = eDNA_Ea - 1
 
 Temp_ref_C = 20.0
 Temp_ref_K = 273.15 + Temp_ref_C
+
+#k = -(math.log(C/Co,math.e)/ t)
+#half = math.log(2,math.e)/k/60/60/24/365
 
 """half-life stats from DNA cassette paper @20 Celsius"""
 Half_eDNA = 345.0
@@ -39,7 +47,7 @@ def half_life_years(Temp_C: float, encapsulated: bool) -> float:
         Ea = eDNA_Ea
         half_life = Half_eDNA
     else:
-        Ea = dDna_Ea
+        Ea = dDNA_Ea
         half_life = Half_dDNA
 
     k_ref = math.log(2.0) / half_life
@@ -61,4 +69,6 @@ def remaining_dna_fraction(Temp_C: float, encapsulated: bool, num_weeks: float) 
     time_years  = num_weeks / num_weeks_yearly
     return math.exp(-k_T * time_years)
 
+#<---------------------------------------------------------->#
 
+# ---------- Half life vs temperature (degree Celsius)(Fig. 5G style) ---------- #
