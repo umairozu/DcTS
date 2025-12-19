@@ -1,13 +1,33 @@
 import math
 from dataclasses import dataclass
-from typing import Dict
+from typing import Dict, List, Tuple, Optional
 
 import numpy as np
+import matplotlib.pyplot as plt
 from openpyxl import load_workbook
 
-R = 8.31446261815324
+R = 8.31446261815324 # gas const in J/(mol * k)
 SEC_PER_WEEK = 7 * 24 * 3600
 SEC_PER_YEAR = 365 * 24 * 3600
+
+"""
+We are Replicating 'Arrhenius Calculate' behavior using RawData.xlsx:
+  -> k is obtained from linear fit of ln(C/Co) vs time in seconds:
+        ln(c) = -k t + ln(c0) ### From Supp text S6
+        
+    (from the sheet):
+  - D-DNA fit uses weeks 0,1,2 only 
+  - E-DNA fit uses weeks 0,1,2,3
+  
+  - remaining fraction: C/C0 = exp(-k t)
+  - half-life: ln(2)/k (converted to years)
+  
+  IMPORTANT Equation!!
+  - Arrhenius: ln k = ln A - Ea/(R T)  (used for Fig 5G curve (Half life vs temp))
+  - k is Decay rate constant
+  - ea is activation energy
+  
+"""
 
 @dataclass
 class CassetteTapeDecay:
@@ -18,6 +38,65 @@ class CassetteTapeDecay:
     ea_e: float = 133880.342    # Activation Energy encapsulated DNA
     lnA_d: float = None
     lnA_e: float = None
+
+    blocks = {
+        # format =
+        # week no. : {temp: (start_row, end_row),...,...}
+        0 : {60: (2,7), 65: (2,7), 70: (2,7)},
+        1 : {60: (8, 13), 65: (14, 19), 70: (20,25)},
+        2 : {60: (26, 31), 65: (32, 37), 70: (38, 43)},
+        3 : {60: (44, 49), 65: (50, 55), 70: (56, 61)},
+
+    }
+
+    """Non-numeric junk removal (e.g N.A, blank cells, inf) for proper averaging,
+    returns valid cells of type int ot float
+    """
+    @staticmethod
+    def numeric_cells(file, col: str, r1: int, r2: int) -> List[float]:
+        vals = []
+        for r in range(r1, r2 + 1):
+            v = file[f"{col}{r}"].value
+            if isinstance(v,(int,float)) and not (math.isnan(v) or math.isinf(v)):
+                vals.append(float(v))
+        return vals
+
+    """
+    - ln_mean = C/ Co column
+    - time_s = time in seconds
+    ndarray is used instead of list bcz of speed and efficiency,
+     ndarray is type hinting here, can't use array here!!!
+     - Equation used -> ln (C / Co) = -kt
+     - slope = -k
+    """
+    @staticmethod
+    def fit_k(ln_means: np.ndarray, time_s: np.ndarray) -> float:
+        slope, intercept = np.polyfit(time_s,ln_means,1)
+        return float(-slope)
+
+    """    
+    - ln k = ln A - Ea/(R*T)  => ln A = ln k + Ea/(R*T)  
+    -> A is some pre exponential factor in Arrhenius Eq.
+    # due to limited data we are not fitting both Ea and lnA
+    by linear Regression of lnK vs 1/T (wherein:
+        slope m = -Ea / R --> Ea = -m / R
+        intercept b = ln A), linear reg here would have yielded
+    better results but since we only have 3 temps(60,65,75) and each
+    k is little noisy, so fitting both parameters can be sensitive,
+    as small change in k would change the slope and intercept a lot.
+    
+    Averaging ln A values is more stable approach in our case.
+    """
+    @staticmethod
+    def fit_lnA(k_table: Dict[int, float], ea: float) -> float:
+        vals = []
+        for temp_C, k in k_table.items():
+            T = 273.15 + float(temp_C)
+            vals.append(math.log(k) + ea / (R * T))
+        return float(sum(vals) / len(vals))
+
+    #<------------------To be continued>#
+
 
     @staticmethod
     def from_rawdata_xlsx(xlsx_path: str) -> "CassetteTapeDecay":
@@ -51,15 +130,6 @@ class CassetteTapeDecay:
 
         return model
 
-
-    """    # ln k = ln A - Ea/(R T)  => ln A = ln k + Ea/(R T)  """
-    @staticmethod
-    def fit_lnA(k_table: Dict[int, float], ea: float) -> float:
-        vals = []
-        for temp_C, k in k_table.items():
-            T = 273.15 + float(temp_C)
-            vals.append(math.log(k) + ea / (R * T))
-        return float(sum(vals) / len(vals))
 
     def k(self, temp_C: float, encapsulated: bool) -> float:
         temp_C_int = int(round(temp_C))
