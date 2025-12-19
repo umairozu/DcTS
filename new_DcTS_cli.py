@@ -32,12 +32,12 @@ We are Replicating 'Arrhenius Calculate' behavior using RawData.xlsx:
 @dataclass
 class CassetteTapeDecay:
 
-    k_d: Dict[int, float]  # D-DNA tape: temp_C -> k   (key, value)
-    k_e: Dict[int, float]  # E-DNA tape: temp_C -> k   (key, value)
+    k_dDNA: Dict[int, float]  # D-DNA tape: temp_C -> k   (key, value)
+    k_eDNA: Dict[int, float]  # E-DNA tape: temp_C -> k   (key, value)
     ea_d: float = 90813.822     # Activation Energy decapsulated DNA
     ea_e: float = 133880.342    # Activation Energy encapsulated DNA
-    lnA_d: float = None
-    lnA_e: float = None
+    lnA_dDNA: float = None
+    lnA_eDNA: float = None
 
     blocks = {
         # format =
@@ -95,10 +95,96 @@ class CassetteTapeDecay:
             vals.append(math.log(k) + ea / (R * T))
         return float(sum(vals) / len(vals))
 
-    #<------------------To be continued>#
+    """Retrieve data from xlsx for related calculations"""
+    @classmethod
+    def from_xlsx(cls, xlsx_path: str) -> "CassetteTapeDecay":
+        wb = load_workbook(xlsx_path, data_only=True)
+        ws = wb["Arrhenius Calculate"]
+
+        ea_d = 10923*8.314 #hard coding from file
+        ea_e = 16103*8.314 #hard coding from file
+
+        # concentration columns for D-DNA & E-DNA
+        col_D = "K"
+        col_E = "Q"
+
+        temps = [60,65,70]
+
+        """Taking average of rows from ng/ul columns for that week"""
+        def ln_conc_mean(col: str, week: int, temp: int) -> Optional[float]:
+            r1, r2 = cls.blocks[week][temp]
+            vals = cls.numeric_cells(ws,col,r1,r2)
+            if len(vals) == 0:
+                return None
+            return float(math.log(np.mean(vals)))
+
+        t0 = 0.0
+        t1 = 1.0 * SEC_PER_WEEK
+        t2 = 2.0 * SEC_PER_WEEK
+        t3 = 3.0 * SEC_PER_WEEK
+
+        # D-DNA
+        k_dDNA : Dict[int, float] = {}
+        for temp in temps:
+            y0 = ln_conc_mean(col_D,0,temp)
+            y1 = ln_conc_mean(col_D,1,temp)
+            y2 = ln_conc_mean(col_D,2,temp)
+            """ 
+            y3 = No y3, it is most probably left intentionally
+             maybe to be consistent with the fitting, as data for
+             60 and 65 degrees is available but not for 70 degree
+             in week 3
+             """
+
+            time = np.array([t0,t1,t2],dtype= float)
+            ln_conc_meanS = np.array([y0,y1,y2],dtype=float)
+            k_dDNA[temp] = cls.fit_k(ln_conc_meanS,time)
+            # ^^^^^^^^
+            #  using all ln_conc of a particular temp calculate
+            # one K value (e.g K @ 60 degree via ln_con(w0,w1,w2 etc @60 C))
+
+        # E-DNA
+        k_eDNA : Dict[int,float] = {}
+        for temp in temps:
+            y0 = ln_conc_mean(col_E, 0,temp)
+            y1 = ln_conc_mean(col_E,1,temp)
+            y2 = ln_conc_mean(col_E,2,temp)
+            y3 = ln_conc_mean(col_E,3,temp)
+
+            time = np.array([t0,t1,t2,t3], dtype= float)
+            ln_conc_meanS = np.array([y0,y1,y2,y3,],dtype= float)
+
+            k_eDNA[temp] = cls.fit_k(ln_conc_meanS,time)
+
+        lnA_dDNA = cls.fit_lnA(k_dDNA,ea_d)
+        lnA_eDNA = cls.fit_lnA(k_eDNA,ea_e)
+
+        return cls(k_dDNA = k_dDNA, k_eDNA = k_eDNA,ea_d = ea_d, ea_e = ea_e, lnA_dDNA = lnA_dDNA, lnA_eDNA = lnA_eDNA)
+
+    def k(self, temp_C: float, encapsulated: bool) -> float:
+        temp = int(round(temp_C))
+        if encapsulated and temp in self.k_eDNA:
+            return self.k_eDNA[temp]
+        if (not encapsulated) and temp in self.k_dDNA:
+            return self.k_dDNA[temp]
+
+        """If your temp not in the dict, then convert the temp
+        and put it into the ARRHENIUS EQUATION"""
+
+        T = 273.15 + float(temp)
+        if encapsulated:
+            return math.exp(self.lnA_eDNA - self.ea_e / (R * T))
+        return math.exp(self.lnA_dDNA - self.ea_d / (R * T))
 
 
-    @staticmethod
+#<------------------------To be continued----------------------->#
+
+
+
+
+
+
+"""    @staticmethod
     def from_rawdata_xlsx(xlsx_path: str) -> "CassetteTapeDecay":
         wb = load_workbook(xlsx_path, data_only=True)
         ws = wb["Arrhenius Calculate"]
@@ -123,25 +209,25 @@ class CassetteTapeDecay:
             slope, _ = np.polyfit(t_e, y, 1)
             k_e[temp] = float(-slope)
 
-        model = CassetteTapeDecay(k_d=k_d, k_e=k_e)
+        model = CassetteTapeDecay(k_dDNA=k_d, k_eDNA=k_e)
 
-        model.lnA_d = model.fit_lnA(model.k_d, model.ea_d)
-        model.lnA_e = model.fit_lnA(model.k_e, model.ea_e)
+        model.lnA_dDNA = model.fit_lnA(model.k_dDNA, model.ea_d)
+        model.lnA_eDNA = model.fit_lnA(model.k_eDNA, model.ea_e)
 
-        return model
+        return model"""
 
-
+"""
     def k(self, temp_C: float, encapsulated: bool) -> float:
         temp_C_int = int(round(temp_C))
-        if encapsulated and temp_C_int in self.k_e:
-            return self.k_e[temp_C_int]
-        if (not encapsulated) and temp_C_int in self.k_d:
-            return self.k_d[temp_C_int]
+        if encapsulated and temp_C_int in self.k_eDNA:
+            return self.k_eDNA[temp_C_int]
+        if (not encapsulated) and temp_C_int in self.k_dDNA:
+            return self.k_dDNA[temp_C_int]
 
         T = 273.15 + float(temp_C)
         if encapsulated:
-            return math.exp(self.lnA_e - self.ea_e / (R * T))
-        return math.exp(self.lnA_d - self.ea_d / (R * T))
+            return math.exp(self.lnA_eDNA - self.ea_e / (R * T))
+        return math.exp(self.lnA_dDNA - self.ea_d / (R * T))"""
 
     def remaining_fraction(self, temp_C: float, encapsulated: bool, weeks: float) -> float:
         t_sec = float(weeks) * SEC_PER_WEEK
