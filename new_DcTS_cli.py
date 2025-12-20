@@ -111,8 +111,8 @@ class CassetteTapeDecay:
         temps = [60,65,70]
 
         """Taking average of rows from ng/ul columns for that week"""
-        def ln_conc_mean(col: str, week: int, temp: int) -> Optional[float]:
-            r1, r2 = cls.blocks[week][temp]
+        def ln_conc_mean(col: str, week: int, temperature: int) -> Optional[float]:
+            r1, r2 = cls.blocks[week][temperature]
             vals = cls.numeric_cells(ws,col,r1,r2)
             if len(vals) == 0:
                 return None
@@ -176,64 +176,34 @@ class CassetteTapeDecay:
             return math.exp(self.lnA_eDNA - self.ea_e / (R * T))
         return math.exp(self.lnA_dDNA - self.ea_d / (R * T))
 
+    """
+        - remaining_dna_frac = C / Co
+        - formula used ->>>>   lnC - lnCo = -kt 
+                               ln (C / Co) = -kt
+                               C / Co = e^-kt
+    """
+    def remaining_dna_frac(self, temp_C: float, encapsulated: bool, week: float) -> float:
+        t = SEC_PER_WEEK * week
+        return math.exp(-self.k(temp_C,encapsulated) * t)
 
-#<------------------------To be continued----------------------->#
+    """
+    - half-life calculation
+    - formula = ln(2) / k(temp)
+        divide by Sec_per_year for half-life (Years) as in Fig 5.G
+    """
+    def half_life(self, temp_C: float, encapsulated: bool) -> float:
+        return (math.log(2) / self.k(temp_C,encapsulated)) / SEC_PER_YEAR
+
+    # <------------------------To be continued----------------------->#
+    """
+    def empirical_helper_func(self):
+        return None
+    def plot(self):
+        return None
+    """
 
 
 
 
 
-
-"""    @staticmethod
-    def from_rawdata_xlsx(xlsx_path: str) -> "CassetteTapeDecay":
-        wb = load_workbook(xlsx_path, data_only=True)
-        ws = wb["Arrhenius Calculate"]
-
-        temps = [60, 65, 70]
-
-        # D-DNA tape table data fetch from xlsx
-        t_d = np.array([ws["H66"].value, ws["H67"].value, ws["H68"].value], dtype=float)
-        cols_d = ["I", "J", "K"]
-        k_d = {}
-        for temp, col in zip(temps, cols_d):
-            y = np.array([ws[f"{col}66"].value, ws[f"{col}67"].value, ws[f"{col}68"].value], dtype=float)
-            slope, _ = np.polyfit(t_d, y, 1)
-            k_d[temp] = float(-slope)
-
-        # E-DNA tape table data fetch from xlsx
-        t_e = np.array([ws["N66"].value, ws["N67"].value, ws["N68"].value, ws["N69"].value], dtype=float)
-        cols_e = ["O", "P", "Q"]
-        k_e = {}
-        for temp, col in zip(temps, cols_e):
-            y = np.array([ws[f"{col}66"].value, ws[f"{col}67"].value, ws[f"{col}68"].value, ws[f"{col}69"].value], dtype=float)
-            slope, _ = np.polyfit(t_e, y, 1)
-            k_e[temp] = float(-slope)
-
-        model = CassetteTapeDecay(k_dDNA=k_d, k_eDNA=k_e)
-
-        model.lnA_dDNA = model.fit_lnA(model.k_dDNA, model.ea_d)
-        model.lnA_eDNA = model.fit_lnA(model.k_eDNA, model.ea_e)
-
-        return model"""
-
-"""
-    def k(self, temp_C: float, encapsulated: bool) -> float:
-        temp_C_int = int(round(temp_C))
-        if encapsulated and temp_C_int in self.k_eDNA:
-            return self.k_eDNA[temp_C_int]
-        if (not encapsulated) and temp_C_int in self.k_dDNA:
-            return self.k_dDNA[temp_C_int]
-
-        T = 273.15 + float(temp_C)
-        if encapsulated:
-            return math.exp(self.lnA_eDNA - self.ea_e / (R * T))
-        return math.exp(self.lnA_dDNA - self.ea_d / (R * T))"""
-
-    def remaining_fraction(self, temp_C: float, encapsulated: bool, weeks: float) -> float:
-        t_sec = float(weeks) * SEC_PER_WEEK
-        return math.exp(-self.k(temp_C, encapsulated) * t_sec)
-
-    def half_life_years(self, temp_C: float, encapsulated: bool) -> float:
-        k_val = self.k(temp_C, encapsulated)
-        return (math.log(2) / k_val) / SEC_PER_YEAR
 
