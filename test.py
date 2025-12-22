@@ -1,15 +1,21 @@
-from new_DcTS_cli import *
-from pathlib import Path
+from new_DcTS_cli import CassetteTapeDecay
+from PlotClass import PlotClass
 
 
 
-model = CassetteTapeDecay.from_rawdata_xlsx("RawData.xlsx")
+if __name__ == "__main__":
+        xlsx = "RawData.xlsx"
 
-for temp in [60, 65, 70]:
-    frac_E_3w = model.remaining_fraction(temp, encapsulated=True, weeks=3)
-    frac_D_3w = model.remaining_fraction(temp, encapsulated=False, weeks=3)
-    print(temp, "E 3w:", frac_E_3w, "D 3w:", frac_D_3w)
+        sim = CassetteTapeDecay.from_xlsx(xlsx)
+        plot_class = PlotClass()
+        plot_class.model = sim
 
+
+        print("  D-DNA:", sim.k_dDNA)
+        print("  E-DNA:", sim.k_eDNA)
+        print("Ea (J/mol):", "D:", sim.ea_d, "E:", sim.ea_e)
+
+        plot_class.plot_fig5E(xlsx_path=xlsx, out_png="Fig5E_sim.png")
 
 #<--------------------------------------------------------->
 
