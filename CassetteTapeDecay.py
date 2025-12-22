@@ -229,3 +229,49 @@ class CassetteTapeDecay:
         return float(-res.slope)
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#<--------------------------------------EXTRA's-------------------------------------------------------------------------------->#
+
+
+    """    def empirical_fractions(self, xlsx_path: str, encapsulated: bool) -> Dict[Tuple[int, int], List[float]]:
+            """"""
+            Returns replicate fractions (C/C0) per (tempC, week) computed from ng/uL columns,
+            so it works even if Excel formula cache isn't present.
+            """"""
+            wb = load_workbook(xlsx_path, data_only=True)
+            ws = wb["Arrhenius Calculate"]
+            col = "Q" if encapsulated else "K"
+
+            c0_vals = self.numeric_cells(ws, col, 2, 7)
+            c0 = float(np.mean(c0_vals))
+
+            out: Dict[Tuple[int, int], List[float]] = {}
+            for week, mapping in self.blocks.items():
+                for temp, (r1, r2) in mapping.items():
+                    vals = self.numeric_cells(ws, col, r1, r2)
+                    if week == 0:
+                        out[(temp, week)] = [1.0]
+                    else:
+                        out[(temp, week)] = [v / c0 for v in vals] if vals else []
+            return out
+    """
