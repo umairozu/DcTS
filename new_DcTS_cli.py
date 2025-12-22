@@ -1,7 +1,7 @@
 import math
 from dataclasses import dataclass
 from typing import Dict, List, Tuple, Optional
-
+from scipy import stats
 import numpy as np
 import matplotlib.pyplot as plt
 from openpyxl import load_workbook
@@ -138,10 +138,12 @@ class CassetteTapeDecay:
 
             time = np.array([t0,t1,t2],dtype= float)
             ln_conc_meanS = np.array([y0,y1,y2],dtype=float)
-            k_dDNA[temp] = cls.fit_k(ln_conc_meanS,time)
+            #k_dDNA[temp] = cls.fit_k(ln_conc_meanS,time)
             # ^^^^^^^^
             #  using all ln_conc of a particular temp calculate
             # one K value (e.g K @ 60 degree via ln_con(w0,w1,w2 etc @60 C))
+            k_dDNA[temp] = cls.fit_k_lingress(ws, col="K", temp=temp, max_week=3)
+            #^^^^^^^^^^^using this linear regression based k for now instead
 
         # E-DNA
         k_eDNA : Dict[int,float] = {}
@@ -154,7 +156,8 @@ class CassetteTapeDecay:
             time = np.array([t0,t1,t2,t3], dtype= float)
             ln_conc_meanS = np.array([y0,y1,y2,y3,],dtype= float)
 
-            k_eDNA[temp] = cls.fit_k(ln_conc_meanS,time)
+            #k_eDNA[temp] = cls.fit_k(ln_conc_meanS,time)
+            k_eDNA[temp] = cls.fit_k_lingress(ws, col="Q", temp=temp, max_week=3)
 
         lnA_dDNA = cls.fit_lnA(k_dDNA,ea_d)
         lnA_eDNA = cls.fit_lnA(k_eDNA,ea_e)
@@ -171,10 +174,10 @@ class CassetteTapeDecay:
         """If your temp not in the dict, then convert the temp
         and put it into the ARRHENIUS EQUATION"""
 
-        T = 273.15 + float(temp)
+        T = 273.15 + float(temp_C)
         if encapsulated:
-            return math.exp(self.lnA_eDNA - self.ea_e / (R * T))
-        return math.exp(self.lnA_dDNA - self.ea_d / (R * T))
+            return math.exp(self.lnA_eDNA -(self.ea_e / (R * T)))
+        return math.exp(self.lnA_dDNA - (self.ea_d / (R * T)))
 
     """
         - remaining_dna_frac = C / Co
@@ -194,16 +197,35 @@ class CassetteTapeDecay:
     def half_life(self, temp_C: float, encapsulated: bool) -> float:
         return (math.log(2) / self.k(temp_C,encapsulated)) / SEC_PER_YEAR
 
-    # <------------------------To be continued----------------------->#
+
     """
-    def empirical_helper_func(self):
-        return None
-    def plot(self):
-        return None
+    calculating k via linear regression of ln (frac) vs time (t)
+    where frac ---> C / Co 
     """
+    @classmethod
+    def fit_k_lingress(cls, ws, col: str, temp: int, max_week: int) -> float:
 
+        c0_vals = cls.numeric_cells(ws, col, 2, 7)
+        c0 = float(np.mean(c0_vals))
 
+        xs: List[float] = []
+        ys: List[float] = []
 
+        for _v in c0_vals:
+            xs.append(0.0)
+            ys.append(0.0)
 
+        for week in range(1, max_week + 1):
+            r1, r2 = cls.blocks[week][temp]
+            vals = cls.numeric_cells(ws, col, r1, r2)
+            t = week * SEC_PER_WEEK
+            for c in vals:
+                frac = c / c0
+                if frac > 0:
+                    xs.append(t)
+                    ys.append(math.log(frac))
+
+        res =  stats.linregress(xs, ys)
+        return float(-res.slope)
 
 
