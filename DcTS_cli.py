@@ -1,74 +1,79 @@
 
-#import argparse
-import math
-import random
-from cmath import exp
-from pathlib import Path
-from typing import Optional, List
-
-import numpy as np
+from __future__ import annotations
 import matplotlib.pyplot as plt
+import numpy as np
+import math
+import argparse
+from typing import Optional
+
+from CassetteTapeDecay import CassetteTapeDecay
+
+def isDna(seq: str)-> bool:
+    if not seq:
+        return False
+    for char in seq.upper():
+        if char not in "ACGT":
+            return False
+    return True
+
+def fig_5E(
+        model: CassetteTapeDecay, temp_C: float, encapsulated: bool,
+        weeks: float, graph_points: int, out_png: str
+            ):
+
+    t_grid = np.linspace(0.0,weeks,graph_points)
+    fractions = np.array([model.remaining_dna_frac(temp_C,encapsulated,w) for w in t_grid], dtype= float)
+    k_values = model.k(temp_C,encapsulated)
+    half_values = model.half_life(temp_C, encapsulated)
+
+    mode = "E-DNA" if encapsulated else "D-DNA"
+
+    plt.figure(figsize=(7,5))
+    plt.plot(t_grid,fractions)
+    plt.yscale("log")
+    plt.xlabel("Weeks")
+    plt.ylabel("DNA content C / C0")
+    plt.title(f"{mode} @ {temp_C:g}°C | k={k_values:.3e} s⁻¹ | t½={half_values:.3g} years")
+    plt.tight_layout()
+    plt.savefig(out_png, dpi = 200)
 
 
-R = 8.31446261815324 # gas const in J/(mol * k)
-eDNA_Ea =  133880.342  # E-DNA activation energy value from data
-dDNA_Ea = 90813.822     # D-DNA activation energy value from data
 
-"""assuming activation energy of D-DNA <= E-DNA 
-(need to refine this with probably stats from MESA
- or DeSP)"""
-#dDna_Ea = eDNA_Ea - 1
+def fig5G(
+        model: CassetteTapeDecay, temp_min: float, temp_max: float,
+        step_c: float, mark_temp: Optional[float],out_png: str
+            ):
 
-Temp_ref_C = 20.0
-Temp_ref_K = 273.15 + Temp_ref_C
+    temps = np.arange(float(temp_min), float(temp_max), float(step_c))
 
-#k = -(math.log(C/Co,math.e)/ t)
-#half = math.log(2,math.e)/k/60/60/24/365
+    half_D = np.array([model.half_life(float(T), encapsulated=False) for T in temps], dtype=float)
+    half_E = np.array([model.half_life(float(T), encapsulated=True)  for T in temps], dtype=float)
 
-"""half-life stats from DNA cassette paper @20 Celsius"""
-Half_eDNA = 345.0
-Half_dDNA = Half_eDNA / 40.5 # pg 7. eDNa 10x retention vs dDNa
+    plt.figure(figsize=(7, 5))
+    plt.plot(temps, half_D, linestyle="--", label="D-DNA")
+    plt.plot(temps, half_E, linestyle="-",  label="E-DNA")
 
-num_weeks_yearly = 52.177456
+    if mark_temp is not None:
+        half_D_pt = model.half_life(mark_temp, encapsulated=False)
+        half_E_pt = model.half_life(mark_temp, encapsulated=True)
+        plt.scatter([mark_temp], [half_D_pt], marker="s", label=f"D @ {mark_temp:g}°C")
+        plt.scatter([mark_temp], [half_E_pt], marker="o", label=f"E @ {mark_temp:g}°C")
 
-"""user enters a temp value in Celsius, plus whether the tape is
-Encapsulated or not"""
-"""
+    plt.yscale("log")
+    plt.xlabel("Temperature (°C)")
+    plt.ylabel("Half-life (years)")
+    plt.title(" Half-life vs Temperature (°C)")
+    plt.legend(fontsize=9)
+    plt.tight_layout()
+    plt.savefig(out_png, dpi=200)
 
--> Step 1: we get the right activation energy & half life value
--> Step 2: we calculate decay rate const (K_ref)
--> Step 3: using the formula in Supp text 6, log K(t) is calculated
--> Step 4: remove log and get k_T
--> Step 5: re-calculate half_life 
-"""
-def half_life_years(Temp_C: float, encapsulated: bool) -> float:
-    Temp_K = 273.15 + Temp_C
-    if encapsulated:
-        Ea = eDNA_Ea
-        half_life = Half_eDNA
-    else:
-        Ea = dDNA_Ea
-        half_life = Half_dDNA
 
-    k_ref = math.log(2.0) / half_life
 
-    log_k_T = math.log(k_ref) - Ea/R * (1 / Temp_K - 1 / Temp_ref_K)
 
-    k_T = math.exp(log_k_T)
 
-    half_life = math.log(2.0) / k_T
-    return  half_life
 
-"""
-Using Eq2 from Supp text 6
-f(t) = C(t) / C_o = e power -k(T)t
-"""
-def remaining_dna_fraction(Temp_C: float, encapsulated: bool, num_weeks: float) -> float:
-    half_life = half_life_years(Temp_C,encapsulated)
-    k_T = math.log(2.0) / half_life
-    time_years  = num_weeks / num_weeks_yearly
-    return math.exp(-k_T * time_years)
 
-#<---------------------------------------------------------->#
 
-# ---------- Half life vs temperature (degree Celsius)(Fig. 5G style) ---------- #
+
+
+
