@@ -188,7 +188,7 @@ class CassetteTapeDecay:
     def remaining_dna_frac(self, temp_C: float, encapsulated: bool, week: float) -> float:
         t = SEC_PER_WEEK * week
         if (not encapsulated) and (temp_C >= 70.0) and (week >= 2.0):
-            return 1e-12 #keep it undetectable instead of 0.0 intentionally
+            return 1e-12 #kept it undetectable instead of 0.0 intentionally
         return math.exp(-self.k(temp_C,encapsulated) * t)
 
     """
