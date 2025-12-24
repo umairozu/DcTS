@@ -72,7 +72,7 @@ def fig5G(
 def main():
     p = argparse.ArgumentParser(description="DNA cassette tape simulator CLI")
 
-    p.add_argument("--xlsx", required= True, help="Path to RawData.xlsx")
+    #p.add_argument("--xlsx", required= True, help="Path to RawData.xlsx")
     p.add_argument("--seq", required=True, help="DNA sequence (A/C/G/T)")
     p.add_argument("--temp", required= True, type= float, help="temperature in celsius for Fig5E and 5G")
     p.add_argument("--encapsulated", action= "store_true", help= "if encapsulated use E-DNA, else D-DNA")
@@ -82,23 +82,23 @@ def main():
     p.add_argument("--temp_min", type= float, default= -20.0, help="Min temp for fig5G (default = -20.0)")
     p.add_argument("--temp_max", type= float, default= 80.0, help= "Max temp for fig5G (default = 80.0)")
 
-    p.add_argument("--out_prefix", default= "output", help= "prefix for output file (e.g run1_fig5G.png)")
+    p.add_argument("--save", default= "output", help= "prefix for output file (e.g run1_fig5G.png)")
 
     args = p.parse_args()
 
     if not isDna(args.seq):
         sys.exit("Input sequence must only contain A/C/G/T characters")
 
-    model = CassetteTapeDecay.from_xlsx(args.xlsx)
+    model = CassetteTapeDecay.from_xlsx("RawData_Umair's.xlsx")
 
-    out_fig5E = f"{args.out_prefix}_fig5E.png"
-    out_fig5G = f"{args.out_prefix}_fig5G.png"
+    out_fig5E = f"{args.save}_fig5E.png"
+    out_fig5G = f"{args.save}_fig5G.png"
 
     fig_5E(
         model = model,
         temp_C = args.temp,
         encapsulated= args.encapsulated,
-        weeks = args.weeks,
+        weeks = args.weeks if args.weeks > 0.0 else sys.exit("Invalid num weeks"),
         graph_points= 200,
         out_png= out_fig5E
     )
@@ -115,11 +115,11 @@ def main():
     """Terminal outputs"""
     mode = "E-DNA (encapsulated DNA)" if args.encapsulated else "D-DNA (decapsulated DNA)"
     print("=== DcTS --DNA cassette tape simulator ===")
-    print(f"sequence length: {len(args.seq)} nt")
-    print(f"fig 5E mode: {mode}")
+    print(f"Sequence length: {len(args.seq)} nt")
+    print(f"Fig 5E mode: {mode}")
     print(f"Temp for fig 5E: {args.temp} °C" )
-    print(f"saved fig 5E as: {out_fig5E}")
-    print(f"saved fig 5G as: {out_fig5G}")
+    print(f"Saved fig 5E as: {out_fig5E}")
+    print(f"Sved fig 5G as: {out_fig5G}")
 
 if __name__ == "__main__":
         main()
