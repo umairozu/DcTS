@@ -1,7 +1,10 @@
+import dataclasses
+from dataclasses import dataclass
 from typing import Optional, List
-from Partition import Partition
+from Partition_Module.Partition import Partition
 
 
+@dataclass
 class BarcodeFolder:
 
     label: str
@@ -17,7 +20,7 @@ class BarcodeFolder:
 
     def creating_slots(self):
         cap = Partition.partitions_for_label(self.label)
-        self.slot = [Partition() for _ in range(cap)]
+        self.slot = [Partition(index= i) for i in range(cap)]
 
     def capacity(self) -> int:
         return len(self.slot)
@@ -30,8 +33,8 @@ class BarcodeFolder:
         return None
 
     def get_slot(self, index: int)-> Partition:
-        if index < 1 or index > self.capacity():
-            raise IndexError(f"desired partition {index} out of range, 1..{self.capacity()} for folder {self.label}")
+        if index < 0 or index > self.capacity():
+            raise IndexError(f"desired partition {index} out of range, 0..{self.capacity() - 1} for folder {self.label}")
         return self.slot[index]
 
 

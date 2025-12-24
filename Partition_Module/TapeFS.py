@@ -1,8 +1,10 @@
+from collections import defaultdict
+from dataclasses import dataclass, field
 from typing import Dict, Tuple, List
 import re
 from Partition_Module.BarcodeFolder import BarcodeFolder
 
-
+@dataclass
 class TapeFS:
 
     """
@@ -11,22 +13,22 @@ class TapeFS:
     e,g: JK Li_5, JK Li_22
     """
 
-    folders: Dict[str, BarcodeFolder]
+    folders: Dict[str, BarcodeFolder] = field(default_factory= dict)
 
     def createFolder(self,label: str) -> BarcodeFolder:
         if label in self.folders:
             return self.folders[label]
-        folder = BarcodeFolder()
-        folder.label = label
+        folder = BarcodeFolder(label=label, slot= [])
+        folder.creating_slots()
         self.folders[label] = folder
         return folder
 
-    @staticmethod
+
     def address_info(self, address: str) ->  int:
         address = re.match(r"^(.*)_(\d+)$",address)
         if address is None:
             raise ValueError(f"invalid address provided. format is <label>_<index>") #ValueError is for invalid DATA boii
-        index = int(address.group(1)) # 'group()' is a part of the text that was captured by parentheses () in the pattern
+        index = int(address.group(2)) # 'group()' is a part of the text that was captured by parentheses () in the pattern
         return index
 
 
@@ -42,7 +44,7 @@ class TapeFS:
             # if the specified folder exists but is full, Error is generated
         p.payload = payload
         print(f"deposited at {label}_{p.index}")
-
+        return f"{label}_{p.index}"
 
     """
     - checking address(label) at first : valid or not valid
@@ -52,7 +54,8 @@ class TapeFS:
     """
     # returning payload as string
     def retrieve(self, label: str) -> str:
-        index = self.address_info(self,label)
+        index = self.address_info(label)
+        label = label.rsplit("_",1)[-2]
         if label not in self.folders:
             raise KeyError(f"folder '{label}' does not exist")
         retrieval_folder = self.folders[label]
@@ -62,7 +65,7 @@ class TapeFS:
         return payload
 
     def removal(self, label: str) -> None:
-        index = self.address_info(self,label)
+        index = self.address_info(label)
         if label not in self.folders:
             raise KeyError(f"folder '{label}' does not exist")
         removal_folder = self.folders[label]
@@ -71,13 +74,12 @@ class TapeFS:
             raise KeyError(f"payload at {label}_{index} is empty, nothing for removal")
         payload = None
 
-    """for that particular folder, display all partitions (index 1, false) info in that slot"""
+    """for that particular folder, display all partitions (index 1, false) info from that slot"""
     def list_folder(self, label:str) -> List[Tuple[int,bool]]:
-        index = self.address_info(self,label)
         folder = self.folders[label]
         if folder is None:
             raise KeyError(f"Unknown folder '{label}'")
-        p = folder.get_slot(index)
+        p = folder.slot
         return [(p.index, not p.isEmpty()) for p in folder.slot]
 
 
