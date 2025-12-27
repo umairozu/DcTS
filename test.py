@@ -36,8 +36,8 @@ if __name__ == "__main__":
         recovered_label2 = fs.retrieve(label2)
         print(f"recovered DNA data from {label2}: {recovered_label2}")
 
-        print("Folder occupancy:", fs.list_folder("JK Li")[:10], "...")
+        print("Folder occupancy:", fs.list_folder("JK Li")[:5])
 
-                #<--------------------------------------------------------->
+            #<--------------------------------------------------------->#
 
 

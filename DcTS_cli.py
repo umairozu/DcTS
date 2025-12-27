@@ -89,7 +89,7 @@ def main():
     if not isDna(args.seq):
         sys.exit("Input sequence must only contain A/C/G/T characters")
 
-    model = CassetteTapeDecay.from_xlsx("RawData_Umair's.xlsx")
+    model = CassetteTapeDecay.from_xlsx("RawData.xlsx")
 
     out_fig5E = f"{args.save}_fig5E.png"
     out_fig5G = f"{args.save}_fig5G.png"

@@ -142,6 +142,7 @@ class CassetteTapeDecay:
             # ^^^^^^^^
             #  using all ln_conc of a particular temp calculate
             # one K value (e.g K @ 60 degree via ln_con(w0,w1,w2 etc @60 C))
+
             k_dDNA[temp] = cls.fit_k_lingress(ws, col="K", temp=temp, max_week=3)
             #^^^^^^^^^^^using this linear regression based k for now instead
 
