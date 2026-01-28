@@ -15,18 +15,19 @@ class OligoSequence:
     """
     adapter_L: str
     rs_code: str
-    payload: str
+    data_payload: str
     seed: str
     cutting_site: str
     adapter_R: str
 
+
     def sequence(self) -> str:
-        return self.adapter_L + self.rs_code + self.payload + self.seed + self.cutting_site + self.adapter_R
+        return self.adapter_L + self.rs_code + self.data_payload + self.seed + self.cutting_site + self.adapter_R
 
     def validation(self):
         assert (len(self.adapter_L)    == 20)
         assert (len(self.rs_code)      == 20)
-        assert (len(self.payload)      == 64)
+        assert (len(self.data_payload) == 64)
         assert (len(self.seed)         == 16)
         assert (len(self.cutting_site) == 4)
         assert (len(self.adapter_R)    == 20)

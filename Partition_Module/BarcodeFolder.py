@@ -1,6 +1,9 @@
 import dataclasses
 from dataclasses import dataclass
 from typing import Optional, List
+
+from DNA_Payload import DNA_Payload
+from OligoSequence import OligoSequence
 from Partition_Module.Partition import Partition
 
 
@@ -20,7 +23,9 @@ class BarcodeFolder:
 
     def creating_slots(self):
         cap = Partition.partitions_for_label(self.label)
-        self.slot = [Partition(index= i) for i in range(cap)]
+        #seq = OligoSequence("","","","","","")
+        #DNA_payload = DNA_Payload([(seq,0,False)])
+        self.slot = [Partition(index = i) for i in range(cap)]
 
     def capacity(self) -> int:
         return len(self.slot)
@@ -33,7 +38,7 @@ class BarcodeFolder:
         return None
 
     def get_slot(self, index: int)-> Partition:
-        if index < 0 or index > self.capacity():
+        if index < 0 or index >= self.capacity():
             raise IndexError(f"desired partition {index} out of range, 0..{self.capacity() - 1} for folder {self.label}")
         return self.slot[index]
 

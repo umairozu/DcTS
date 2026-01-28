@@ -1,12 +1,15 @@
-from dataclasses import dataclass
-from typing import Optional
+from dataclasses import dataclass, field
+from typing import Optional, List
 from DNA_Payload import DNA_Payload
 
 @dataclass
 class Partition:
 
     index: int
-    payload: Optional[DNA_Payload] = None # see DNA_payload & OligoSequence class for info
+    # Ensuring every Partition get separate payload memory not shared as in
+    # for example:
+    # payload: Optional[DNA_Payload] = DNA_Payload()
+    payload : DNA_Payload = field(default_factory = DNA_Payload)
 
     """Supplementary text 1"""
     @staticmethod
@@ -15,4 +18,7 @@ class Partition:
         return 9 + 3 * n
 
     def isEmpty(self) -> bool:
-        return self.payload is None
+        for item in self.payload.oligos:
+            if item[0] is None:
+                return True
+        return False

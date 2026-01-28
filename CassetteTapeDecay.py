@@ -167,10 +167,10 @@ class CassetteTapeDecay:
 
     def k(self, temp_C: float, encapsulated: bool) -> float:
         temp = int(round(temp_C))
-        if encapsulated and temp in self.k_eDNA:
+        """if encapsulated and temp in self.k_eDNA:
             return self.k_eDNA[temp]
         if (not encapsulated) and temp in self.k_dDNA:
-            return self.k_dDNA[temp]
+            return self.k_dDNA[temp]"""
 
         """If your temp not in the dict, then convert the temp
         and put it into the ARRHENIUS EQUATION"""
@@ -188,7 +188,7 @@ class CassetteTapeDecay:
     """
     def remaining_dna_frac(self, temp_C: float, encapsulated: bool, week: float) -> float:
         t = SEC_PER_WEEK * week
-        if (not encapsulated) and (temp_C >= 70.0) and (week >= 2.0):
+        if (not encapsulated) and (temp_C >= 70.0) and (week > 2.0):
             return 1e-12 #kept it undetectable instead of 0.0 intentionally
         return math.exp(-self.k(temp_C,encapsulated) * t)
 
