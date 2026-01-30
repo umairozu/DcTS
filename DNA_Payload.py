@@ -13,7 +13,7 @@ class DNA_Payload:
     #source_id: str
 
     # oligo's as list of [oligo sequence , Co_copies, encapsulated]
-    oligos: List[Tuple[Optional[OligoSequence], int, bool]] = field(default_factory=list)
+    oligos: List[Tuple[Optional[OligoSequence.sequence], int, bool]] = field(default_factory=list)
 
 
     def __post_init__(self):
@@ -25,6 +25,8 @@ class DNA_Payload:
             if item[0] is None or item[0] == "":
                 return True
         return False
+    def __getcopies__(self):
+        return self.oligos[0][1]
 
 
 

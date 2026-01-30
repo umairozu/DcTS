@@ -8,6 +8,8 @@ from OligoSequence import OligoSequence
 
 if __name__ == "__main__":
 
+                                        # Degradation module
+
         """#fig 5E & G
         xlsx = "RawData.xlsx"
 
@@ -28,53 +30,51 @@ if __name__ == "__main__":
 
 
 
-        #partition module
-        oligo1 = OligoSequence("ADL_","RS_CODE_","ACGTACTC_","SEED_","ENZYME_","ADR_")
-        dna = DNA_Payload([(oligo1,2,True)])
-        # OR
-        #dna = DNA_Payload(True, [(oligo1.sequence(), 2)])
+                                        #partition module
 
+        #Oligos
+        oligo1 = OligoSequence("A" * 20, "C" * 20, "ACGT" * 16, "G" * 16, "TTAA", "T" * 20).sequence()
+        oligo2 = OligoSequence("C" * 20, "G" * 20, "TGCA" * 16, "A" * 16, "CCGG", "A" * 20).sequence()
+        oligo3 = OligoSequence("G" * 20, "T" * 20, "AGCT" * 16, "C" * 16, "GGCC", "C" * 20).sequence()
+        oligo4 = OligoSequence("T" * 20, "A" * 20, "TCGA" * 16, "T" * 16, "ATGC", "G" * 20).sequence()
+        oligo5 = OligoSequence("ACGT" * 5, "TGCA" * 5, "GATT" * 16, "ACGT" * 4, "CTAG", "CGTA" * 5).sequence()
+        oligo6 = OligoSequence("GTAC" * 5, "CAGT" * 5, "TTAA" * 16, "GTAC" * 4, "AATT", "TACG" * 5).sequence()
+        oligo7 = OligoSequence("AAAAACCCCCGGGGGTTTTT", "CCCCCGGGGGAAAAATTTTT", "ATCG" * 16, "GCGCGCGCGCGCGCGC", "CGCG","TTTTTGGGGGCCCCCAAAAA").sequence()
+        oligo8 = OligoSequence("AGCT" * 5, "TCGA" * 5, "CGAT" * 16, "TATATATATATATATA", "TATA", "GCTA" * 5).sequence()
+        oligo9 = OligoSequence("CTAG" * 5, "GATC" * 5, "AAGG" * 16, "CCCCAAAAGGGGTTTT", "AGCT", "TAGC" * 5).sequence()
+        oligo10 = OligoSequence("GCGC" * 5, "ATAT" * 5, "CCGG" * 16, "ATGCATGCATGCATGC", "GCAT", "CGCG" * 5).sequence()
+
+        # DNA Payloads
+        dna_payload_1 = DNA_Payload([(oligo1,1,True)])
+        dna_payload_2 = DNA_Payload([(oligo2, 1, True)])
+        dna_payload_3 = DNA_Payload([(oligo3, 1, True)])
+        dna_payload_4 = DNA_Payload([(oligo4, 1, True)])
+        dna_payload_5 = DNA_Payload([(oligo5, 1, True)])
+        dna_payload_6 = DNA_Payload([(oligo6, 1, True)])
+        dna_payload_7 = DNA_Payload([(oligo7, 4, True)])
+        dna_payload_8 = DNA_Payload([(oligo8, 0, True)])
+        dna_payload_9 = DNA_Payload([(oligo9, 0, True)])
+        dna_payload_10 = DNA_Payload([(oligo10, 0, True)])
+
+        dna_payload_bulk = [dna_payload_1,dna_payload_2,dna_payload_3,dna_payload_4,dna_payload_5,dna_payload_6,dna_payload_7,dna_payload_8,dna_payload_9,dna_payload_10]
 
         fs = TapeFS()
-        """assert Partition.partitions_for_label("a") == 12
-        assert Partition.partitions_for_label("a1") == 15
-        assert Partition.partitions_for_label("a1a") == 18"""
+        #fs.createFolder("a")
+        #for payload in dna_payload_bulk:
+        #        fs.deposit("a_1", payload)
+        #fs.deposit("a_0", dna_payload_7)
+        #fs.empty_partition("a_0")
+        #fs.empty_partition("a_1")
 
-        myfolder = fs.createFolder("a")
-        #depo_1 = fs.deposit("a_0", oligo1, 1, True)
-        depo_6 = fs.deposit("a_1", oligo1, 1, True)
-        print("<-------->")
-        depo_6_retrieval = fs.retrieve("a_1","ADL_","ADR_")
-        print("<-------->")
-        #fs.removal("a_1","ADL_", "ADR_")
-        print("<-------->")
-        #depo_6_retrieval_02 = fs.retrieve("a_11","ADL_","ADR_")
-        fs.insertion("a_1","ADL_", "ADR_")
+        #fs.retrieval("a_1","AAAAACCCCCGGGGGTTTTT","TTTTTGGGGGCCCCCAAAAA")
+        #fs.retrieval("a_1","AAAAAAAAAAAAAAAAAAAA","TTTTTTTTTTTTTTTTTTTT")
 
-        print("<---------------------------------------->")
+        #fs.removal("a_1","GGGGGGGGGGGGGGGGGGGG","CCCCCCCCCCCCCCCCCCCC")
 
-        #label2 = fs.deposit("a_0", oligo1, 1, True)
-        #label3 = fs.deposit("a_0", oligo1, 1, True)
-        #label4 = fs.deposit("a_0", oligo1, 1, True)
-        #should not be deposited
-        #label5 = fs.deposit("a_0", oligo1, 1, True)
+        #fs.list_folder("a1")
+
+        #fs.edit_Oligo("a_1","AAAAACCCCCGGGGGTTTTT","TTTTTGGGGGCCCCCAAAAA","TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT")
 
 
-
-        #label7 = fs.deposit("a_1", oligo1, 1, True)
-        #label8 = fs.deposit("a_1", oligo1, 1, True)
-        #label9 = fs.deposit("a_1", oligo1, 1, True)
-        # should not be deposited
-        #label10 = fs.deposit("a_1", oligo1, 1, True)
-
-
-        #recovered_label1 = fs.retrieve(label1)
-        #print(f"recovered DNA data from {label1}: {recovered_label1}")
-
-        #recovered_label2 = fs.retrieve(label2)
-        #print(f"recovered DNA data from {label2}: {recovered_label2}")
-
-        print("Folder occupancy:", fs.list_folder("a")[:5])
-
-         #<--------------------------------------------------------->#
+                                #<--------------------------------------------------------->#
 

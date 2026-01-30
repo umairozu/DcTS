@@ -20,7 +20,6 @@ class OligoSequence:
     cutting_site: str
     adapter_R: str
 
-
     def sequence(self) -> str:
         return self.adapter_L + self.rs_code + self.data_payload + self.seed + self.cutting_site + self.adapter_R
 
