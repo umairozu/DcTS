@@ -1,7 +1,4 @@
-from CassetteTapeDecay import CassetteTapeDecay
-from PlotClass import PlotClass
-
-from Partition_Module.TapeFS import TapeFS
+from TapeFS import TapeFS
 from Partition_Module.Partition import Partition
 from DNA_Payload import DNA_Payload
 from OligoSequence import OligoSequence
@@ -44,6 +41,9 @@ if __name__ == "__main__":
         oligo9 = OligoSequence("CTAG" * 5, "GATC" * 5, "AAGG" * 16, "CCCCAAAAGGGGTTTT", "AGCT", "TAGC" * 5).sequence()
         oligo10 = OligoSequence("GCGC" * 5, "ATAT" * 5, "CCGG" * 16, "ATGCATGCATGCATGC", "GCAT", "CGCG" * 5).sequence()
 
+        """invalid Oligo"""
+        #invalid_oligo = OligoSequence("M"*20,"C" * 20, "ACGT" * 16, "G" * 16, "TTAA", "T" * 20)
+
         # DNA Payloads
         dna_payload_1 = DNA_Payload([(oligo1,1,True)])
         dna_payload_2 = DNA_Payload([(oligo2, 1, True)])
@@ -56,10 +56,13 @@ if __name__ == "__main__":
         dna_payload_9 = DNA_Payload([(oligo9, 0, True)])
         dna_payload_10 = DNA_Payload([(oligo10, 0, True)])
 
+        """invalid Oligo Payload"""
+        #invalid_dna_payload = DNA_Payload([(invalid_oligo, 2, False)])
+
         dna_payload_bulk = [dna_payload_1,dna_payload_2,dna_payload_3,dna_payload_4,dna_payload_5,dna_payload_6,dna_payload_7,dna_payload_8,dna_payload_9,dna_payload_10]
 
         fs = TapeFS()
-        #fs.createFolder("a")
+        #fs.createFolder("d")
         #for payload in dna_payload_bulk:
         #        fs.deposit("a_1", payload)
         #fs.deposit("a_0", dna_payload_7)
@@ -75,6 +78,9 @@ if __name__ == "__main__":
 
         #fs.edit_Oligo("a_1","AAAAACCCCCGGGGGTTTTT","TTTTTGGGGGCCCCCAAAAA","TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT")
 
+        print(fs.barcode_IDs("d"))
+        fs.scan_barcode("l_191")
 
-                                #<--------------------------------------------------------->#
+
+                        #<--------------------------------------------------------->#
 

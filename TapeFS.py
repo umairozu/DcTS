@@ -1,16 +1,10 @@
+import json
 import os
-import subprocess
-import tempfile
-from collections import defaultdict
+import random
 from dataclasses import dataclass, field
-from typing import Dict, Tuple, List, Optional
 import re
-
 from natsort import natsorted
-
 from DNA_Payload import DNA_Payload
-from OligoSequence import OligoSequence
-from Partition_Module.BarcodeFolder import BarcodeFolder
 
 @dataclass
 class TapeFS:
@@ -41,12 +35,103 @@ class TapeFS:
         num_partitions = self.partitions_for_label(label)
         if not os.path.exists(new_path):
             os.mkdir(new_path)
+            meta_data = fr'{os.getcwd()}\{label}\meta_data.txt'
+            with open(meta_data, "a+") as file:
+                file.writelines("start_id: " + self.barcode_IDs(label)[0].__str__() + "\n"
+                                "data_id: " + self.barcode_IDs(label)[1].__str__() + "\n"
+                                "check_id: " + self.barcode_IDs(label)[2].__str__() + "\n"
+                                "stop_id: " + self.barcode_IDs(label)[3].__str__() + "\n")
+
             for i in range(num_partitions):
                 path_0 = f"Partition{i}.txt"
                 path_1 = fr'{os.getcwd()}\{label}\{path_0}'
                 open(path_1,'w')
         else:
             print(f"folder '{label}' already exists!")
+
+
+
+    def barcode_IDs(self, folder):
+        with open("code128.json", "r") as file:
+            json_data = json.load(file)
+
+        symbols = json_data["symbols"]
+
+        start_id = 104
+        stop_id = 106
+        running_checksum = 0
+        total = start_id
+
+        data_ids = []
+
+        counter = 1
+
+        for f in folder:
+            for s in symbols:
+                if s["A"] == f or s["B"] == f or s["C"] == f:
+                    running_checksum += counter * s["id"]
+                    counter += 1
+                    data_ids.append(s["id"])
+                    #return s["id"]
+        total += running_checksum
+        check_id = total % 103
+
+        return start_id, data_ids, check_id, stop_id
+
+    def check_id(self, start, data):
+        counter = 1
+        running_checksum = 0
+        total = start
+        for i in range(len(data)):
+            running_checksum += counter * data[i]
+            counter += 1
+        total += running_checksum
+        check_id = total % 103
+        return check_id
+
+
+    def scan_barcode(self,label):
+        p_del = 0.001
+        p_sub = 0.0001
+        p_insert = 0.0001
+
+        label = label.rsplit("_",1)[-2]
+        path = fr'{os.getcwd()}\{label}'
+        #print(path)
+
+        start_id = self.barcode_IDs(label)[0]
+        data_id = self.barcode_IDs(label)[1]
+        check_id = self.barcode_IDs(label)[2]
+        stop_id = self.barcode_IDs(label)[3]
+
+        if os.path.exists(path):
+            """meta_data = fr'{path}\meta_data.txt'""" # meta_data.txt is not used, computing ids on the fly
+            if random.random() < p_insert:
+                random_id = random.randint(0,102)
+                data_id.append(random_id)
+            elif random.random() < p_sub:
+                data_id[0] = data_id[0] + 1
+            elif random.random() < p_del:
+                data_id.pop()
+            print(data_id)
+        else:
+            print(f"Invalid Path --> [{path}]")
+            return
+
+        if check_id == self.check_id(start_id,data_id):
+            print("Barcode read Successfully!")
+        else:
+            raise RuntimeError("[Barcode not read properly] \n Please try again!")
+
+
+
+
+
+
+
+
+
+
 
     def deposit(self, label, DNA_Payload: DNA_Payload):
         index = self.address_info(label)
@@ -60,7 +145,7 @@ class TapeFS:
                 file.seek(0)
                 num_lines = len(file.readlines())
                 #print(num_lines)
-                deposition_amount = DNA_Payload.__getcopies__()
+                deposition_amount = DNA_Payload.get_copies()
                 if deposition_amount and deposition_amount <= (10 - num_lines) :
                         for _ in range(deposition_amount):
                             file.writelines(str(DNA_Payload.oligos[0][0] +","+ DNA_Payload.oligos[0][2].__str__())+"\n") # if needed we can rewrite num_copies as well with data_payload & encapsulated

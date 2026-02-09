@@ -16,16 +16,17 @@ class DNA_Payload:
     oligos: List[Tuple[Optional[OligoSequence.sequence], int, bool]] = field(default_factory=list)
 
 
-    def __post_init__(self):
+    #Remove this if not used
+    """def __post_init__(self):
         if not self.oligos:
-            self.oligos = [(None,0,False)] * TOTAL_SPACE
+            self.oligos = [(None,0,False)] * TOTAL_SPACE"""
 
     def isEmpty(self):
         for item in self.oligos:
             if item[0] is None or item[0] == "":
                 return True
         return False
-    def __getcopies__(self):
+    def get_copies(self):
         return self.oligos[0][1]
 
 

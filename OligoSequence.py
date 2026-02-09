@@ -1,4 +1,4 @@
-
+import re
 from dataclasses import dataclass
 
 @dataclass
@@ -19,6 +19,12 @@ class OligoSequence:
     seed: str
     cutting_site: str
     adapter_R: str
+    def __post_init__(self):
+        if not (re.fullmatch(r'[ACGT]{20}', self.adapter_L) and re.fullmatch(r'[ACGT]{20}', self.rs_code)
+                and re.fullmatch(r'[ACGT]{64}', self.data_payload) and re.fullmatch(r'[ACGT]{16}', self.seed)
+                and re.fullmatch(r'[ACGT]{4}', self.cutting_site) and re.fullmatch(r'[ACGT]{20}', self.adapter_R)):
+            raise RuntimeError("Invalid sequence, allowed bases are [A/C/G/T] for specific length only.")
+
 
     def sequence(self) -> str:
         return self.adapter_L + self.rs_code + self.data_payload + self.seed + self.cutting_site + self.adapter_R
