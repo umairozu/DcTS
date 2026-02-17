@@ -1,5 +1,8 @@
 from itertools import groupby
 
+# Error rates Sources from MESA
+# https://github.com/umr-ds/mesa_dna_sim/blob/master/simulators/error_sources/homopolymers.py
+
 def error_func(homopolymer_length, base= None):
     if homopolymer_length < 3:
         return 0.0
@@ -17,7 +20,7 @@ def error_func(homopolymer_length, base= None):
 def homopolymer(sequence):
     result = []
 
-    #k (The Key): This is the character that is currently repeating (e.g., 'A')
+    # k (The Key): This is the character that is currently repeating (e.g., 'A')
     # g (The Group): This is an iterator containing all the items in that specific streak.
     # Because it is an iterator,you usually have to convert it to a list(g) to see the contents.
 
@@ -32,7 +35,7 @@ def homopolymer(sequence):
     return result
 
 if __name__ == "__main__":
-    print(homopolymer("AAAGAAAGGGAAGGAATAGGTTACTAGGCCCAACCGCAAGCCCTTTGGTCAACCGCAGTGGAAAGAAGGGCTAATAGGTCCTGGTAGATTTACCACTGAA"))
+    print(homopolymer("TGGCTCATTTCACAATCGGTCAACCAATACCTTCACCGGAGTGTCTACTCAAGATGAGAGATATATCGGCAGAATCTTACATAGCGTCGTTGCAGGGCGGACGGCGGCCGAGTACTGCCGGATCATAAATGACCTGCCGTGCAA"))
 
 
 

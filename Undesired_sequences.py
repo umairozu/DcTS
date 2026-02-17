@@ -1,9 +1,11 @@
 import os
 
 
-#SOURCE MESA Simulator
+# SOURCE MESA Simulator
 # (https://github.com/umr-ds/mesa_dna_sim/blob/master/simulators/error_sources/undesired_subsequences.py)
 
+# More undesired motifs could be added later if needed,
+# "De Bruijn Trim rotation graph encoding for reliable DNA storage" mentions some undesired motif's in section 3.3
 undesired_sequences = [
     {
         "sequence": "TATAAA",
