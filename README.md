@@ -1,35 +1,27 @@
-# DcTS --Dna-cassette-tape-Simulator
 
+#  DNA Data Storage Simulator 🧬
+A simulation environment implementing concepts for long-term data storage using DNA sequences.
 
-Cli command examples:
+## 📚 Referenced Papers & Research
 
-> python DcTS_cli.py --seq ACGTACGTACGT --temp 65 --encapsulated --save run1
+This simulator is built upon the methodologies described in the following research:
 
-**OUTPUT:**  
-=== DcTS --DNA cassette tape simulator ===  
-sequence length: 12 nt  
-fig 5E mode: E-DNA (encapsulated DNA)  
-Temp for fig 5E: 65.0 °C  
-saved fig 5E as: run1_fig5E.png  
-saved fig 5G as: run1_fig5G.png
+### 1. A Compact Cassette Tape for DNA-Based Data Storage
 
-> python DcTS_cli.py --seq ACGTACGTACGT --temp 65 --save run2
+* **Published:** 2025
+* **Journal:** *Science Advances*
+* **Authors:** Jiankai Li, Cuiping Mao, Shuchen Wang, Xingjian Li, et al.
+* **Links:** * [Read the Full Paper](https://www.science.org/doi/10.1126/sciadv.ady3406)
+* [Original Implementation (GitHub)](https://github.com/JianKai-Lee/DNA-Cassette-Tape/tree/main/Editing_analysis)
 
-**OUTPUT:**
-=== DcTS --DNA cassette tape simulator ===  
-sequence length: 12 nt  
-fig 5E mode: D-DNA (decapsulated DNA)  
-Temp for fig 5E: 65.0 °C  
-saved fig 5E as: run2_fig5E.png  
-saved fig 5G as: run2_fig5G.png
+---
 
-Referenced Paper Details:  
-Paper name: "A compact cassette tape for DNA-based data storage " (Published 2025)  
-Authors: Jiankai Li1, Cuiping Mao1, Shuchen Wang1, Xingjian Li1, Xueqing Luo1, Dou Wang1, Shuo Zheng2, Jialin Shao1, Rui Wang2, Chunhai Fan3, Xingyu Jiang1*  
-Provided github account: https://github.com/JianKai-Lee/DNA-Cassette-Tape/tree/main/Editing_analysis  
-Paper link: https://www.science.org/doi/10.1126/sciadv.ady3406
+## 📂 Supplementary Materials
 
-Supplementary materials:  
--https://www.science.org/doi/10.1126/sciadv.ady3406  
--https://zenodo.org/records/15788037
+For a deeper dive into the datasets and analysis tools used in this research, refer to the following resources:
+
+| Resource Type | Link |
+| --- | --- |
+| **Full Text / DOI** | [Science.org - ady3406](https://www.science.org/doi/10.1126/sciadv.ady3406) |
+| **Dataset & Records** | [Zenodo Repository (15788037)](https://zenodo.org/records/15788037) |
 
