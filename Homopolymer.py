@@ -1,6 +1,6 @@
 from itertools import groupby
 
-# Error rates Sources from MESA
+# Error rates Sourced from MESA
 # https://github.com/umr-ds/mesa_dna_sim/blob/master/simulators/error_sources/homopolymers.py
 
 def error_func(homopolymer_length, base= None):
@@ -15,7 +15,7 @@ def error_func(homopolymer_length, base= None):
     else:
         return 1.0
 
-# take a sequence and error_fun
+# take a sequence and error_func
 # return list of tuple of (Base,homopolymer_error probability)
 def homopolymer(sequence):
     result = []
@@ -30,14 +30,13 @@ def homopolymer(sequence):
         length = len(seq)
         error = error_func(length)
         if error > 0.0:
-            result.append((seq,error))
+            #result.append(("".join(seq),error))
+            result.append(seq) # output currently: [['T', 'T', 'T', 'T', 'T'], ['T', 'T', 'T'], ['G', 'G', 'G'], ['A', 'A', 'A']]
 
     return result
 
 if __name__ == "__main__":
-    print(homopolymer("TGGCTCATTTCACAATCGGTCAACCAATACCTTCACCGGAGTGTCTACTCAAGATGAGAGATATATCGGCAGAATCTTACATAGCGTCGTTGCAGGGCGGACGGCGGCCGAGTACTGCCGGATCATAAATGACCTGCCGTGCAA"))
-
-
+    print(homopolymer("TTTTTGGCTCATTTCACAATCGGTCAACCAATACCTTCACCGGAGTGTCTACTCAAGATGAGAGATATATCGGCAGAATCTTACATAGCGTCGTTGCAGGGCGGACGGCGGCCGAGTACTGCCGGATCATAAATGACCTGCCGTGCAA"))
 
 
 

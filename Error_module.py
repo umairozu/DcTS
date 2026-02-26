@@ -1,5 +1,8 @@
 import random
+from itertools import chain
 import numpy as np
+from ordered_set import OrderedSet
+
 from Homopolymer import homopolymer
 
 # sequencing_error.py
@@ -77,7 +80,7 @@ class sequencingError:
         except KeyError:
             pattern = None
 
-        position_range = [20,100]
+        position_range = [20,100] # this is just an example initialization
         return position, pattern, position_range
 
     def insertion(self, ins_attr_dict = None):
@@ -95,9 +98,94 @@ class sequencingError:
         if position == 'homopolymer':
             poly = homopolymer(self.seq)
             if poly:
-                return self.indel_homopolyer(pattern, position_range, mode = 'insertion')
+                return self.indel_homopolymer(poly, pattern, mode = 'insertion')
         # if not position or position != random or position == homopolymer but poly is empty --> then random insertion
         return self.indel(pattern, position_range, mode='insertion')
+
+
+    def indel_homopolymer(self, poly, pattern, mode):
+        print(f"provided polymer: {poly} ")
+        print(f"provided pattern: {pattern} ")
+
+        poly_bases = list(OrderedSet(chain.from_iterable(poly)))
+        print(f"Poly bases: {poly_bases}" )
+        new_pattern = []
+        new_pattern_weights = {}
+
+        if not poly: # if no homopolymer available then go back to normal indel method
+            return self.indel(pattern = None, position_range = None, mode = mode)
+
+        for base in poly_bases:
+            if base in pattern:
+                new_pattern.append(base)  # this for loop is removing those bases from
+                                          # pattern that are not in any of our homopolymers
+
+            """        
+            if not pattern: # if no pattern probabilities provided, then give equal weights to each base
+            for base in new_pattern:
+                new_pattern_weights[base] = 1 / len(new_pattern)
+            else:
+            """
+            #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            # instead i could make a validate pattern/ mutation_attributes method or class
+            #~~~~~~~~~~~~~~~IMPORTANT~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+        #sum of bases in new_pattern
+        sum_bases = 0
+        for base in new_pattern:
+            sum_bases += pattern[base]
+
+        """normalizing bases weight to 1"""
+        #new_pattern_weights = {}
+        for base in new_pattern:
+            new_pattern_weights[base] = pattern[base]/sum_bases
+
+        print(f"new pattern: {new_pattern}")
+        print(f"new pattern weights: {new_pattern_weights}")
+
+
+        chosen_base = np.random.choice(list(new_pattern_weights.keys()), p= list(new_pattern_weights.values()))
+        print(f"chosen base from new pattern: {chosen_base}")
+
+        #poly is like [['T', 'T', 'T', 'T', 'T'], ['T', 'T', 'T'], ['G', 'G', 'G'], ['A', 'A', 'A']]
+        # check homopolymer.py for details
+        possible_mutables = ["".join(item) for item in poly if chosen_base in item]
+        print(f"possible mutables: {possible_mutables}")
+
+        chosen_mutable = random.choice(possible_mutables) # a list here right now e.g ['T', 'T', 'T']
+        chosen_mutable = "".join(chosen_mutable) # converted to a string
+        print(f"chosen mutable: {chosen_mutable}")
+
+        index = random.randrange(len(chosen_mutable))
+        print(f"chosen index:  {index} ")
+
+        base = random.choice(self.bases)
+        print(f"chosen base:  {base} ")
+
+        # homopolymer is being mutated here based on mode
+        if mode == 'insertion':
+            chosen_mutable = chosen_mutable[:index] + base + chosen_mutable[index:]
+        elif mode == 'deletion':
+            chosen_mutable = chosen_mutable[:index] + " " + chosen_mutable[index + 1:]
+
+
+        """Output for insertion as an example:"""
+        """
+        provided polymer: [['T', 'T', 'T', 'T', 'T'], ['T', 'T', 'T'], ['G', 'G', 'G'], ['A', 'A', 'A']] 
+        provided pattern: {'A': 0.25, 'C': 0.25, 'G': 0.25, 'T': 0.25} 
+        Poly bases: ['T', 'G', 'A']
+        new pattern: ['T', 'G', 'A']
+        new pattern weights: {'T': 0.3333333333333333, 'G': 0.3333333333333333, 'A': 0.3333333333333333}
+        chosen base from new pattern: T
+        possible mutables: ['TTTTT', 'TTT']
+        chosen mutable: TTT
+        chosen index:  0 
+        chosen base:  G 
+        mutated homopolymer: GTTT
+        """
+
+        return chosen_mutable
 
 
     """
@@ -160,7 +248,7 @@ class sequencingError:
     """Insertion, deletion, substitution implementing methods"""
     def indel_sub_base(self, pos, mode):
 
-        """2 improvements could be done later(idf needed):
+        """2 improvements could be done later(if needed):
         - currently If position is already visited, nothing happens (silent skip),
             we can close this condition for increase mutation rate if needed
         - currently if base equals the original base, no substitution will happen, we can improve this
@@ -185,4 +273,20 @@ class sequencingError:
                 self.visited_bases[pos] = new_mutation
 
 
-            #Work on HOMOPOLYMER SIDE OF INSERTION
+            #Working on HOMOPOLYMER SIDE OF INSERTION
+
+
+if __name__ == "__main__":
+    #my_poly = [['T', 'T', 'T', 'T', 'T'], ['T', 'T', 'T'], ['G', 'G', 'G'], ['A', 'A', 'A']]
+    my_pattern = {"A": 0.25, "C": 0.25, "G": 0.25, "T": 0.25}
+    ins_mode = "insertion"
+    del_mode = "deletion"
+
+    sequence = "TGGCTCATTTCACAATCGGTAAAGAAAGGGAAGGAATAGGTTACTAGGCCCAACCGCAAGCCCTTTGGTCAACCGCAGTGGAAAGAAGGGCTAATAGGTCCTGGTAGATTTACCACTGAAGATCATAAATGACCTGCCGTGCAA"
+    my_poly2 = homopolymer(sequence)
+
+    sE = sequencingError(sequence, "sequencing", mutation_attributes,err_rates)
+
+    indel_in_homopolymer = sE.indel_homopolymer(my_poly2,my_pattern,ins_mode)
+    print(indel_in_homopolymer)
+
