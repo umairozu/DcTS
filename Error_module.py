@@ -10,18 +10,18 @@ from Homopolymer import homopolymer
 # Error_rates taken from mesa
 # https://github.com/umr-ds/mesa_dna_sim/blob/master/simulators/sequencing/sequencing_error.py
 
-err_rates = {"1": {"raw_rate": 0.0021, "mismatch": 0.81, "deletion": 0.0024, "insertion": 0.0013},
-             "2": {"raw_rate": 0.0032, "mismatch": 0.79, "deletion": 0.0018, "insertion": 0.0011},
-             "3": {"raw_rate": 0.02, "mismatch": 0.75, "deletion": 0.20, "insertion": 0.05},
-             "4": {"raw_rate": 0.14, "mismatch": 0.37, "deletion": 0.21, "insertion": 0.42},
-             "5": {"raw_rate": 0.2, "mismatch": 0.48, "deletion": 0.37, "insertion": 0.15},
-             "6": {"raw_rate": 0.13, "mismatch": 0.41, "deletion": 0.36, "insertion": 0.23}}
+err_rates = {"1": {"raw_rate": 0.0021, "substitution": 0.81, "deletion": 0.0024, "insertion": 0.0013},
+             "2": {"raw_rate": 0.0032, "substitution": 0.79, "deletion": 0.0018, "insertion": 0.0011},
+             "3": {"raw_rate": 0.02, "substitution": 0.75, "deletion": 0.20, "insertion": 0.05},
+             "4": {"raw_rate": 0.14, "substitution": 0.37, "deletion": 0.21, "insertion": 0.42},
+             "5": {"raw_rate": 0.2, "substitution": 0.48, "deletion": 0.37, "insertion": 0.15},
+             "6": {"raw_rate": 0.13, "substitution": 0.41, "deletion": 0.36, "insertion": 0.23}}
 
 mutation_attributes = {"1": {"deletion": {"position": {"random": 1},
                                           "pattern": {"G": 0.25, "C": 0.25, "A": 0.25, "T": 0.25}},
                              "insertion": {"position": {"random": 1},
                                            "pattern": {"G": 0.25, "C": 0.25, "A": 0.25, "T": 0.25}},
-                             "mismatch": {"pattern": {"A": {"G": 0.50, "T": 0.25, "C": 0.25},
+                             "substitution": {"pattern": {"A": {"G": 0.50, "T": 0.25, "C": 0.25},
                                                       "T": {"G": 0.50, "A": 0.25, "C": 0.25},
                                                       "C": {"G": 0.50, "A": 0.25, "T": 0.25},
                                                       "G": {"T": 0.50, "A": 0.25, "C": 0.25}}}},
@@ -29,7 +29,7 @@ mutation_attributes = {"1": {"deletion": {"position": {"random": 1},
                                           "pattern": {"G": 0.25, "C": 0.25, "A": 0.25, "T": 0.25}},
                              "insertion": {"position": {"random": 1},
                                            "pattern": {"G": 0.25, "C": 0.25, "A": 0.25, "T": 0.25}},
-                             "mismatch": {"pattern": {"A": {"G": 0.50, "T": 0.25, "C": 0.25},
+                             "substitution": {"pattern": {"A": {"G": 0.50, "T": 0.25, "C": 0.25},
                                                       "T": {"G": 0.50, "A": 0.25, "C": 0.25},
                                                       "C": {"G": 0.50, "A": 0.25, "T": 0.25},
                                                       "G": {"T": 0.50, "A": 0.25, "C": 0.25}}}},
@@ -37,22 +37,22 @@ mutation_attributes = {"1": {"deletion": {"position": {"random": 1},
                                           "pattern": {"G": 0.35, "C": 0.35, "A": 0.15, "T": 0.15}},
                              "insertion": {"position": {"homopolymer": 0.85, "random": 0.15},
                                            "pattern": {"A": 0.35, "T": 0.35, "C": 0.15, "G": 0.15}},
-                             "mismatch": {"pattern": {"CG": {"CA": 0.5, "TG": 0.5}}}},
+                             "substitution": {"pattern": {"CG": {"CA": 0.5, "TG": 0.5}}}},
                        "4": {"deletion": {"position": {"homopolymer": 0.85, "random": 0.15},
                                           "pattern": {"G": 0.35, "C": 0.35, "A": 0.15, "T": 0.15}},
                              "insertion": {"position": {"homopolymer": 0.85, "random": 0.15},
                                            "pattern": {"A": 0.35, "T": 0.35, "C": 0.15, "G": 0.15}},
-                             "mismatch": {"pattern": {"CG": {"CA": 0.5, "TG": 0.5}}}},
+                             "substitution": {"pattern": {"CG": {"CA": 0.5, "TG": 0.5}}}},
                        "5": {"deletion": {"position": {"homopolymer": 0.46, "random": 0.54},
                                           "pattern": {"G": 0.35, "C": 0.35, "A": 0.15, "T": 0.15}},
                              "insertion": {"position": {"homopolymer": 0.46, "random": 0.54},
                                            "pattern": {"A": 0.35, "T": 0.35, "C": 0.15, "G": 0.15}},
-                             "mismatch": {"pattern": {"TAG": "TGG", "TAC": "TGC"}}},
+                             "substitution": {"pattern": {"TAG": "TGG", "TAC": "TGC"}}},
                        "6": {"deletion": {"position": {"homopolymer": 0.46, "random": 0.54},
                                           "pattern": {"G": 0.35, "C": 0.35, "A": 0.15, "T": 0.15}},
                              "insertion": {"position": {"homopolymer": 0.46, "random": 0.54},
                                            "pattern": {"A": 0.35, "T": 0.35, "C": 0.15, "G": 0.15}},
-                             "mismatch": {"pattern": {"TAG": "TGG", "TAC": "TGC"}}}}
+                             "substitution": {"pattern": {"TAG": "TGG", "TAC": "TGC"}}}}
 
 class sequencingError:
 
@@ -102,90 +102,41 @@ class sequencingError:
         # if not position or position != random or position == homopolymer but poly is empty --> then random insertion
         return self.indel(pattern, position_range, mode='insertion')
 
+    def deletion(self, del_attr_dict = None):
+        # optional deletion attribute dictionary
+        if del_attr_dict:
+            position, pattern, position_range = self.get_attributes(del_attr_dict)
+        # default dictionary
+        else:
+            del_dict = self.attributes['deletion']
+            position, pattern, position_range = self.attributes(del_dict)
 
-    def indel_homopolymer(self, poly, pattern, mode):
-        print(f"provided polymer: {poly} ")
-        print(f"provided pattern: {pattern} ")
+        if not position or position == 'random':
+            return self.indel(pattern,position_range,mode = 'deletion')
 
-        poly_bases = list(OrderedSet(chain.from_iterable(poly)))
-        print(f"Poly bases: {poly_bases}" )
-        new_pattern = []
-        new_pattern_weights = {}
-
-        if not poly: # if no homopolymer available then go back to normal indel method
-            return self.indel(pattern = None, position_range = None, mode = mode)
-
-        for base in poly_bases:
-            if base in pattern:
-                new_pattern.append(base)  # this for loop is removing those bases from
-                                          # pattern that are not in any of our homopolymers
-
-            """        
-            if not pattern: # if no pattern probabilities provided, then give equal weights to each base
-            for base in new_pattern:
-                new_pattern_weights[base] = 1 / len(new_pattern)
-            else:
-            """
-            #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-            # instead i could make a validate pattern/ mutation_attributes method or class
-            #~~~~~~~~~~~~~~~IMPORTANT~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        if position == 'homopolymer':
+            poly = homopolymer(self.seq)
+            if poly:
+                return self.indel_homopolymer(poly, pattern, mode = 'deletion')
+        # if not position or position != random or position == homopolymer but poly is empty --> then random insertion
+        return self.indel(pattern, position_range, mode = 'deletion')
 
 
-        #sum of bases in new_pattern
-        sum_bases = 0
-        for base in new_pattern:
-            sum_bases += pattern[base]
+    def substitution(self, sub_attr_dict = None):
+        # optional deletion attribute dictionary
+        if sub_attr_dict:
+            position, pattern, position_range = self.get_attributes(sub_attr_dict)
+        # default dictionary
+        else:
+            sub_dict = self.attributes['substitution']
+            position, pattern, position_range = self.attributes(sub_attr_dict)
 
-        """normalizing bases weight to 1"""
-        #new_pattern_weights = {}
-        for base in new_pattern:
-            new_pattern_weights[base] = pattern[base]/sum_bases
-
-        print(f"new pattern: {new_pattern}")
-        print(f"new pattern weights: {new_pattern_weights}")
-
-
-        chosen_base = np.random.choice(list(new_pattern_weights.keys()), p= list(new_pattern_weights.values()))
-        print(f"chosen base from new pattern: {chosen_base}")
-
-        #poly is like [['T', 'T', 'T', 'T', 'T'], ['T', 'T', 'T'], ['G', 'G', 'G'], ['A', 'A', 'A']]
-        # check homopolymer.py for details
-        possible_mutables = ["".join(item) for item in poly if chosen_base in item]
-        print(f"possible mutables: {possible_mutables}")
-
-        chosen_mutable = random.choice(possible_mutables) # a list here right now e.g ['T', 'T', 'T']
-        chosen_mutable = "".join(chosen_mutable) # converted to a string
-        print(f"chosen mutable: {chosen_mutable}")
-
-        index = random.randrange(len(chosen_mutable))
-        print(f"chosen index:  {index} ")
-
-        base = random.choice(self.bases)
-        print(f"chosen base:  {base} ")
-
-        # homopolymer is being mutated here based on mode
-        if mode == 'insertion':
-            chosen_mutable = chosen_mutable[:index] + base + chosen_mutable[index:]
-        elif mode == 'deletion':
-            chosen_mutable = chosen_mutable[:index] + " " + chosen_mutable[index + 1:]
+        if not position or position == 'random':
+            return self.positional_sub(pattern, position_range=position_range)
+        else:
+            pass
 
 
-        """Output for insertion as an example:"""
-        """
-        provided polymer: [['T', 'T', 'T', 'T', 'T'], ['T', 'T', 'T'], ['G', 'G', 'G'], ['A', 'A', 'A']] 
-        provided pattern: {'A': 0.25, 'C': 0.25, 'G': 0.25, 'T': 0.25} 
-        Poly bases: ['T', 'G', 'A']
-        new pattern: ['T', 'G', 'A']
-        new pattern weights: {'T': 0.3333333333333333, 'G': 0.3333333333333333, 'A': 0.3333333333333333}
-        chosen base from new pattern: T
-        possible mutables: ['TTTTT', 'TTT']
-        chosen mutable: TTT
-        chosen index:  0 
-        chosen base:  G 
-        mutated homopolymer: GTTT
-        """
-
-        return chosen_mutable
 
 
     """
@@ -255,10 +206,15 @@ class sequencingError:
             by allowing any of the other 3 basses to go at that substitution place
         """
 
+
+        print(f"Original sequence: {self.seq}")
+
+
         assert mode in ("insertion", "deletion", "substitution")
         assert  0 <= pos <= len(self.seq)
 
         base = random.choice(self.bases)
+        print(base)
         new_mutation = {"base": base, "visited": True}
 
         if self.visited_bases[pos]["visited"] == False:
@@ -272,8 +228,126 @@ class sequencingError:
                 self.seq = self.seq[:pos] + base + self.seq[pos + 1:]
                 self.visited_bases[pos] = new_mutation
 
+        return self.seq # remove this return statement later (just for testing rn)
 
-            #Working on HOMOPOLYMER SIDE OF INSERTION
+    def indel_homopolymer(self, poly, pattern, mode):
+        print(f"provided polymer: {poly}")
+        print(f"provided pattern: {pattern}")
+        poly_bases = list(OrderedSet([item['base'] for item in poly]))
+
+        # poly_bases = list(OrderedSet(poly['base']))
+        print(f"Poly bases: {poly_bases}")
+        new_pattern = []
+        new_pattern_weights = {}
+
+        if not poly:  # if no homopolymer available then go back to normal indel method
+            return self.indel(pattern=None, position_range=None, mode=mode)
+
+        for base in poly_bases:
+            if base in pattern:
+                new_pattern.append(base)  # this for loop is removing those bases from
+                # pattern that are not in any of our homopolymers
+
+            """        
+            if not pattern: # if no pattern probabilities provided, then give equal weights to each base
+            for base in new_pattern:
+                new_pattern_weights[base] = 1 / len(new_pattern)
+            else:
+            """
+            # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ #
+            # instead i could make a validate pattern/ mutation_attributes method or class   #
+            # ~~~~~~~~~~~~~~~~~~~~~~~~~~~IMPORTANT~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+
+        # sum of bases in new_pattern
+        sum_bases = 0
+        for base in new_pattern:
+            sum_bases += pattern[base]
+
+        """normalizing bases weight to 1"""
+        # new_pattern_weights = {}
+        for base in new_pattern:
+            new_pattern_weights[base] = pattern[base] / sum_bases
+
+        print(f"new pattern: {new_pattern}")
+        print(f"new pattern weights: {new_pattern_weights}")
+
+        chosen_base = np.random.choice(list(new_pattern_weights.keys()), p=list(new_pattern_weights.values()))
+        print(f"chosen base from new pattern: {chosen_base}")
+
+        # poly is like [{'base': 'A', 'chars': ['A', 'A', 'A', 'A'], 'start_pos': 0, 'end_pos': 3, 'error': 0.6}]
+        # check homopolymer.py for details
+        possible_mutables = [item['chars'] for item in poly if chosen_base in item['chars']]
+        print(f"possible mutables: {possible_mutables}")
+
+        chosen_mutable = random.choice(possible_mutables)  # a list here right now e.g ['T', 'T', 'T']
+        chosen_mutable = "".join(chosen_mutable)  # converted to a string
+        print(f"chosen mutable: {chosen_mutable}")
+
+        # find position of the chosen mutable from the original poly list
+        matching_entry = [entry for entry in poly if entry['chars'] == list(chosen_mutable)]
+        if matching_entry:
+            chosen_entry = random.choice(matching_entry)
+            start_pos = chosen_entry['start_pos']
+            print(f"chosen index:  {start_pos} ")
+
+        """
+        base = random.choice(self.bases)
+        print(f"chosen base:  {base} ")
+
+        # homopolymer is being mutated here based on mode
+        if mode == 'insertion':
+            chosen_mutable = chosen_mutable[:index] + base + chosen_mutable[index:]
+        elif mode == 'deletion':
+            chosen_mutable = chosen_mutable[:index] + " " + chosen_mutable[index + 1:]
+        """
+
+        """Output for insertion as an example:"""
+        """
+        provided polymer: [['T', 'T', 'T', 'T', 'T'], ['T', 'T', 'T'], ['G', 'G', 'G'], ['A', 'A', 'A']] 
+        provided pattern: {'A': 0.25, 'C': 0.25, 'G': 0.25, 'T': 0.25} 
+        Poly bases: ['T', 'G', 'A']
+        new pattern: ['T', 'G', 'A']
+        new pattern weights: {'T': 0.3333333333333333, 'G': 0.3333333333333333, 'A': 0.3333333333333333}
+        chosen base from new pattern: T
+        possible mutables: ['TTTTT', 'TTT']
+        chosen mutable: TTT
+        chosen index:  0 
+        chosen base:  G 
+        mutated homopolymer: GTTT
+        """
+        return self.indel_sub_base(start_pos, mode)
+
+
+    def positional_sub(self, pattern = None, position_range = None):
+        if not pattern:
+            return self.no_pattern_sub(position_range)
+        else:
+            return self.pattern_sub(pattern, position_range)
+
+    def no_pattern_sub(self, position_range = None):
+        if position_range:
+            sequence_indices = range(position_range[0], position_range[1] + 1)
+        else:
+            sequence_indices = range(len(self.seq))
+
+        valid_indices = [i for i in sequence_indices if self.seq[i] != " "]
+        if valid_indices is None:
+            return None ####
+
+        pos = random.choice(valid_indices)
+
+        return self.indel_sub_base(pos, mode = 'mismatch')
+
+    def pattern_sub(self, pattern, position_range):
+
+        return pass # HERRE
+
+
+
+
+
+
+
 
 
 if __name__ == "__main__":
@@ -281,12 +355,14 @@ if __name__ == "__main__":
     my_pattern = {"A": 0.25, "C": 0.25, "G": 0.25, "T": 0.25}
     ins_mode = "insertion"
     del_mode = "deletion"
+    sub_mode = "substitution"
 
-    sequence = "TGGCTCATTTCACAATCGGTAAAGAAAGGGAAGGAATAGGTTACTAGGCCCAACCGCAAGCCCTTTGGTCAACCGCAGTGGAAAGAAGGGCTAATAGGTCCTGGTAGATTTACCACTGAAGATCATAAATGACCTGCCGTGCAA"
+    #sequence = "ATCGAATCGGGATAGATAATCGAATCGGGATAGATA"
+    sequence = "ATCGAATCGGATAGATAA"
     my_poly2 = homopolymer(sequence)
 
     sE = sequencingError(sequence, "sequencing", mutation_attributes,err_rates)
 
-    indel_in_homopolymer = sE.indel_homopolymer(my_poly2,my_pattern,ins_mode)
+    indel_in_homopolymer = sE.indel_homopolymer(my_poly2,my_pattern,del_mode)
     print(indel_in_homopolymer)
 
